@@ -5,28 +5,35 @@ pragma solidity ^0.8.0;
 import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 
 contract MyToken is ERC20 {
-    address private owner;
-
-    constructor(uint256 initialSupply, address owner_) ERC20("CoderCoin", "CDC") {
-        owner = owner_;
-        _mint(owner, initialSupply);
-    }
+    address owner;
+    uint256 supplyTotal = 0;
 
     modifier onlyOwner() {
         require(msg.sender == owner, "Only owner can call this function");
         _;
     }
 
-    function mint(address to, uint256 amount) public onlyOwner {
+    constructor(uint256 initialSupply) ERC20("CoderCoin", "CDC") {
+        owner = msg.sender;
+        _mint(owner, initialSupply);
+        supplyTotal += initialSupply;
+    }
+
+    function CDCIHave() public view returns (uint256){
+        return balanceOf(msg.sender);
+    }
+
+    function mintCoin(address to, uint256 amount) public onlyOwner {
         _mint(to, amount);
+        supplyTotal += amount;
     }
 
-    function burn(uint256 amount) public {
+    function burnCoin(uint256 amount) public {
         _burn(msg.sender, amount);
+        supplyTotal -= amount;
     }
 
-    function transferFrom(address from, address to, uint256 amount) public override(ERC20) returns(bool) {
-        _transfer(from, to, amount);
-        return true;
+    function transferCoin(address to, uint256 amount) public{
+        _transfer(msg.sender, to, amount);
     }
 }
