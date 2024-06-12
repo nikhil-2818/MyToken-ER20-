@@ -9,6 +9,7 @@ This repository contains the Solidity smart contract code for the CoderCoin (CDC
 ### Variables
 
 - `owner` (private, address): Stores the address of the contract owner.
+- `supplyTotal`= Stores the total number of token.
 ### Functions
 
 1. `Constructor`: It takes two arguments `initialSupply`, `owner_`
@@ -16,15 +17,14 @@ This repository contains the Solidity smart contract code for the CoderCoin (CDC
 - owner_ (address): The address of the initial contract owner.
 - Sets the token name ("CoderCoin") and symbol ("CDC").
 - Mints the initial supply of tokens to the owner address.
-2. `mint`(address to, uint256 amount): This function can mint a new token but only contract owner can mint the token.
+2. `mintCoin`(address to, uint256 amount): This function can mint a new token but only contract owner can mint the token.
 -Modifier: onlyOwner - restricts access to the contract owner.
 - to (address): The address to receive the minted tokens.
 - amount (uint256): The number of tokens to mint.
-3. `burn`(uint256 amount): this function allows you to burn token
+3. `burnCoin`(uint256 amount): this function allows you to burn token
 - amount (uint256): The number of tokens to burn.
-4. `transferFrom`(address from, address to, uint256 amount): This function allows you transfer token to other address.
+4. `transferCoin`(address to, uint256 amount): This function allows you transfer token to other address.
 - Standard ERC20 function for transferring tokens between accounts.
-- from (address): The address sending the tokens.
 - to (address): The address receiving the tokens.
 - amount (uint256): The number of tokens to transfer.
 
@@ -41,31 +41,39 @@ pragma solidity ^0.8.0;
 import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 
 contract MyToken is ERC20 {
-    address private owner;
-
-    constructor(uint256 initialSupply, address owner_) ERC20("CoderCoin", "CDC") {
-        owner = owner_;
-        _mint(owner, initialSupply);
-    }
+    address owner;
+    uint256 supplyTotal = 0;
 
     modifier onlyOwner() {
         require(msg.sender == owner, "Only owner can call this function");
         _;
     }
 
-    function mint(address to, uint256 amount) public onlyOwner {
+    constructor(uint256 initialSupply) ERC20("CoderCoin", "CDC") {
+        owner = msg.sender;
+        _mint(owner, initialSupply);
+        supplyTotal += initialSupply;
+    }
+
+    function CDCIHave() public view returns (uint256){
+        return balanceOf(msg.sender);
+    }
+
+    function mintCoin(address to, uint256 amount) public onlyOwner {
         _mint(to, amount);
+        supplyTotal += amount;
     }
 
-    function burn(uint256 amount) public {
+    function burnCoin(uint256 amount) public {
         _burn(msg.sender, amount);
+        supplyTotal -= amount;
     }
 
-    function transferFrom(address from, address to, uint256 amount) public override(ERC20) returns(bool) {
-        _transfer(from, to, amount);
-        return true;
+    function transferCoin(address to, uint256 amount) public{
+        _transfer(msg.sender, to, amount);
     }
 }
+
 
 ```
 To compile the code, click on the "Solidity Compiler" tab in the left-hand sidebar. Make sure the "Compiler" option is set to "0.8.25" (or another compatible version), and then click on the "Compile OwnToken.sol" button.
